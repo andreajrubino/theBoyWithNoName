@@ -45,6 +45,8 @@ public class GameManager extends Thread {
 		//get the currently pressed keys from the KeyboardController
 		HashSet<Integer> currentKeys=KeyboardController.getActiveKeys();
 		
+		boy.checkState();
+		
 		//manage the two possible run direction
 		if(currentKeys.contains(KeyEvent.VK_RIGHT)){
 			//move right
@@ -57,6 +59,11 @@ public class GameManager extends Thread {
 			boy.stop();
 		}
 		
+		if(currentKeys.contains(KeyEvent.VK_SPACE)) {
+			if(!boy.getJumping()){
+				boy.jump();
+			}
+		}
 		
 	}
 

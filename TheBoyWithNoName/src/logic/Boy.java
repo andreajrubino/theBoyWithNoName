@@ -61,6 +61,7 @@ public class Boy {
 	
 	//function called by the GameManager's manageKeys() function
 	public void move(int direction) {
+		
 		switch (direction) {
 			//in case you have to move left..
 			case KeyEvent.VK_LEFT:
@@ -71,8 +72,12 @@ public class Boy {
 				boundingBox.setLocation(currentX, currentY);
 				
 				//change the current frame in animation
-				setFrameNumber();
-				currentFrame=run_L[currentFrameNumber];
+				if(!jumping){
+					setFrameNumber();
+					currentFrame=run_L[currentFrameNumber];
+				} else {
+					currentFrame=run_L[0];
+				}
 				
 				//set the left direction as the last one 
 				last_direction=KeyEvent.VK_LEFT;
@@ -87,8 +92,12 @@ public class Boy {
 				boundingBox.setLocation(currentX, currentY);
 				
 				//change the current frame in animation
-				setFrameNumber();
-				currentFrame=run_R[currentFrameNumber];
+				if(!jumping){
+					setFrameNumber();
+					currentFrame=run_R[currentFrameNumber];
+				} else {
+					currentFrame=run_R[0];
+				}
 				
 				//set the right direction as the last one 
 				last_direction=KeyEvent.VK_RIGHT;
@@ -98,6 +107,25 @@ public class Boy {
 				break;
 		}
 		moveCounter++;
+	}
+	
+	public void checkState() {
+		if(jumping){
+			if(jump_count<15){
+				currentY-=6;
+				boundingBox.setLocation(currentX, currentY);
+			} else {
+				currentY+=6;
+				boundingBox.setLocation(currentX, currentY);
+			}
+			
+			jump_count++;
+			
+			if(jump_count>=30){
+				jumping=false;
+				jump_count=0;
+			}
+		}
 	}
 	
 	//sets the current frame when the boy is moving - we have a total of 5 frames for 
@@ -125,6 +153,19 @@ public class Boy {
 		}
 	}
 
+	
+	public void jump() {
+		this.jumping=true;
+		this.jump_count=0;
+	}
+	
+	public boolean getJumping() {
+		return jumping;
+	}
+	
+	private int jump_count=0;
+	
+	private boolean jumping;
 
 	//gets the current frame of the animation
 	public BufferedImage getCurrentFrame(){
@@ -206,5 +247,4 @@ public class Boy {
 	//current position of the character along the y-axis 
 	//initially the character is placed at BOY_START_X
 	private int currentY=GameFrame.HEIGHT-PlayPanel.TERRAIN_HEIGHT-BOY_HEIGHT;
-	
 }
