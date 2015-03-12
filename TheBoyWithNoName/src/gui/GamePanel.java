@@ -34,10 +34,12 @@ public class GamePanel extends JPanel{
 	public void addBoy(Boy boy) {
 		this.boy=boy;
 		playPanel.addBoy(boy);
+		statsPanel.addBoy(boy);
 	}
 	
 	public void repaintGame(){
 		playPanel.repaint();
+		statsPanel.repaint();
 	}
 	
 	private KeyboardController keyboardController;

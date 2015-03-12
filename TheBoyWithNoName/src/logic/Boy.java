@@ -1,6 +1,7 @@
 package logic;
 
 import gui.GameFrame;
+import gui.GamePanel;
 import gui.PlayPanel;
 
 import java.awt.Rectangle;
@@ -13,6 +14,7 @@ import javax.imageio.ImageIO;
 
 //the boy is the main character of the game, the one you control with your arrow keys
 public class Boy {
+
 	public Boy(){
 		//initialize the buffers that will store the run sprites
 		run_L=new BufferedImage[BUFFER_RUN_SIZE];
@@ -26,7 +28,7 @@ public class Boy {
 		
 		//initialize the bounding box of the character, this will be very important
 		//when we manage collisions between objects
-		boundingBox=new Rectangle(currentX,currentY,BOY_WIDTH,BOY_HEIGHT);
+		boundingBox=new Rectangle(BOY_START_X+DISPLACEMENT,currentY,BOY_WIDTH,BOY_HEIGHT);
 	}
 	
 	
@@ -61,18 +63,23 @@ public class Boy {
 	
 	//function called by the GameManager's manageKeys() function
 	public void move(int direction) {
-		
+		this.idle=false;
 		switch (direction) {
 			//in case you have to move left..
 			case KeyEvent.VK_LEFT:
 				//update the character's position
 				currentX=currentX-DISPLACEMENT;
 				
+				//you can't go back
+				if(currentX<=0){
+					currentX=0;
+				}
+				
 				//update the character's bounding box position
 				boundingBox.setLocation(currentX, currentY);
 				
 				//change the current frame in animation
-				if(!jumping){
+				if(!jumping && !falling){
 					setFrameNumber();
 					currentFrame=run_L[currentFrameNumber];
 				} else {
@@ -92,7 +99,7 @@ public class Boy {
 				boundingBox.setLocation(currentX, currentY);
 				
 				//change the current frame in animation
-				if(!jumping){
+				if(!jumping && !falling){
 					setFrameNumber();
 					currentFrame=run_R[currentFrameNumber];
 				} else {
@@ -106,24 +113,205 @@ public class Boy {
 			default:
 				break;
 		}
+		currentRow=currentY/Tile.TILE_SIZE;
+		currentCol=currentX/Tile.TILE_SIZE;
+		
 		moveCounter++;
 	}
 	
-	public void checkState() {
-		if(jumping){
-			if(jump_count<15){
-				currentY-=6;
-				boundingBox.setLocation(currentX, currentY);
-			} else {
-				currentY+=6;
-				boundingBox.setLocation(currentX, currentY);
+	public void checkRestoringCount() {
+		if(restoring_count>0){
+			restoring_count--;
+			if(restoring_count%RESTORING_MODULE==0){
+				restoring=!restoring;
 			}
+		} 
+	}
+	
+	//checks and handles possible collisions with static blocks (Block class)
+	public void checkBlockCollisions(){
+		
+		//position of the character's feet on the y-axis
+		int footY=(int)(boundingBox.getMaxY());
+		
+		//if the character is jumping, his head must not touch a block;
+		//if it touches a block, stop the ascending phase of the jump (start falling)
+		if(jumping){
+			
+			//row position of the cell above the character's head (in the tiled map)
+			int upRow=(int)((boundingBox.getMinY()-1)/Tile.TILE_SIZE);
+			
+			//tile position relative to the upper-left corner of the character's bounding box
+			int upLeftCornerCol=(int)(boundingBox.getMinX()/Tile.TILE_SIZE);
+			
+			//tile position relative to the upper-right corner of the character's bounding box
+			int upRightCornerCol=(int)((boundingBox.getMaxX())/Tile.TILE_SIZE);
+
+			if(currentRow>=0){
+				if(World.tiledMap[upRow][upLeftCornerCol] instanceof Block){
+					//if the upper-left corner stats intersecting a block, stop the jumping phase
+					//and start the falling phase, setting the jump_count to 0
+					if(World.tiledMap[upRow][upLeftCornerCol].getBoundingBox().intersects(boundingBox)){
+						jumping=false;
+						jump_count=0;
+						falling=true;
+						return;
+					}
+				}
+				if(World.tiledMap[upRow][upRightCornerCol] != null){
+					//if the upper-right corner stats intersecting a block, stop the jumping phase
+					//and start the falling phase, setting the jump_count to 0
+					if(World.tiledMap[upRow][upRightCornerCol].getBoundingBox().intersects(boundingBox)){
+						jumping=false;
+						jump_count=0;
+						falling=true;
+						return;
+					}
+				}
+			}
+		
+		}
+		
+		//if last direction was right..
+		if(last_direction==KeyEvent.VK_RIGHT){
+			
+			//get the left side of the bounding box
+			int footX=(int)boundingBox.getMinX();
+			
+			//get the tile position (in the tiled map) 
+			//relative to the tile in front of the character
+			int tileInFrontOfFootRow=((footY-1)/Tile.TILE_SIZE);
+			int tileInFrontOfFootCol=(footX/Tile.TILE_SIZE)+1;
+			
+			if(tileInFrontOfFootCol<World.COLS){
+				//if the tile in front of the character contains a block..
+				if(World.tiledMap[tileInFrontOfFootRow][tileInFrontOfFootCol] instanceof Block){
+					//..and the character's bounding box intersect the block's one
+					if(boundingBox.intersects(World.tiledMap[tileInFrontOfFootRow][tileInFrontOfFootCol].getBoundingBox())){
+						//push the character away and re-set its position
+						currentX-=DISPLACEMENT;
+						boundingBox.setLocation(currentX, currentY);
+						currentCol=currentX/Tile.TILE_SIZE;
+					}
+				}
+				
+				if(World.tiledMap[currentRow][currentCol] instanceof Block){
+					//if the tile the character finds himself in contains a block, act like above
+					if(boundingBox.intersects(World.tiledMap[currentRow][currentCol].getBoundingBox())){
+						currentX-=DISPLACEMENT;
+						boundingBox.setLocation(currentX, currentY);
+						currentCol=currentX/Tile.TILE_SIZE;
+					}
+				}
+			}
+		} else {
+			//get the right side of the bounding box
+			int footX=(int) boundingBox.getMaxX();
+			
+			//get the tile position (in the tiled map) 
+			//relative to the tile in front of the character
+			int tileInFrontOfFootRow=((footY-1)/Tile.TILE_SIZE);
+			int tileInFrontOfFootCol=(footX/Tile.TILE_SIZE)-1;
+			
+			if(tileInFrontOfFootCol>=0){
+				//if the tile in front of the character contains a block..
+				if(World.tiledMap[tileInFrontOfFootRow][tileInFrontOfFootCol] instanceof Block){
+					//..and the character's bounding box intersect the block's one
+					if(boundingBox.intersects(World.tiledMap[tileInFrontOfFootRow][tileInFrontOfFootCol].getBoundingBox())){
+						//push the character away and re-set its position
+						currentX+=DISPLACEMENT;
+						boundingBox.setLocation(currentX, currentY);
+						currentCol=currentX/Tile.TILE_SIZE;
+					}
+				}
+				
+				if(World.tiledMap[currentRow][currentCol] instanceof Block){
+					//if the tile the character finds himself in contains a block, act like above
+					if(boundingBox.intersects(World.tiledMap[currentRow][currentCol].getBoundingBox())){
+						currentX+=DISPLACEMENT;
+						boundingBox.setLocation(currentX, currentY);
+						currentCol=currentX/Tile.TILE_SIZE;
+					}
+				}
+			}	
+		}
+	}
+
+
+	public void checkFallingState(){
+		if(boundingBox.getMaxY()/Tile.TILE_SIZE>=World.ROWS){
+			die();
+		}
+		
+		
+		if(jumping){
+			return;
+		}
+		
+		if(falling){
+			currentY+=DISPLACEMENT;
+			currentRow=currentY/Tile.TILE_SIZE;
+			boundingBox.setLocation(currentX, currentY);
+		}
+		
+		int lowLeftX=(int)boundingBox.getMinX()+1;
+		int lowRightX=(int) boundingBox.getMaxX()-1;
+		
+		int underlyingTileXR=lowRightX/Tile.TILE_SIZE;
+		int underlyingTileXL=lowLeftX/Tile.TILE_SIZE;
+		
+		if(currentRow+1>=World.ROWS || underlyingTileXR>=World.COLS){
+			return;
+		}
+		
+		if(!((World.tiledMap[currentRow+1][underlyingTileXR]) instanceof Block)
+			&& !((World.tiledMap[currentRow+1][underlyingTileXL]) instanceof Block)){
+			falling=true;
+			return;
+		}
+		
+		falling=false;
+	}
+	
+	private void die() {
+		currentX=BOY_START_X;
+		currentY=GameFrame.HEIGHT-PlayPanel.TERRAIN_HEIGHT-BOY_HEIGHT;
+		currentCol=currentX/Tile.TILE_SIZE;
+		currentRow=currentY/Tile.TILE_SIZE;
+		boundingBox=new Rectangle(BOY_START_X+DISPLACEMENT,currentY,BOY_WIDTH,BOY_HEIGHT);
+		last_direction=KeyEvent.VK_RIGHT;
+		falling=false;
+		restoring=true;
+		restoring_count=RESTORING_THRESH;
+		life--;
+	}
+
+	public void reinitialize() {
+		currentX=0;
+		currentY=GameFrame.HEIGHT-PlayPanel.TERRAIN_HEIGHT-BOY_HEIGHT;
+		currentCol=0;
+		currentRow=currentY/Tile.TILE_SIZE;
+		boundingBox=new Rectangle(BOY_START_X+DISPLACEMENT,currentY,BOY_WIDTH,BOY_HEIGHT);
+		last_direction=KeyEvent.VK_RIGHT;
+		falling=false;
+	}
+	
+	//checks the jumping variables and animates jumps 
+	//check the comments above 'jumping' and 'jump_count' variables
+	//for more details
+	public void checkJumpState() {
+		if(jumping){
+			if(jump_count<JUMP_COUNTER_THRESH){
+				currentY-=DISPLACEMENT;
+				boundingBox.setLocation(currentX, currentY);
+			} 
 			
 			jump_count++;
 			
-			if(jump_count>=30){
+			if(jump_count>=JUMP_COUNTER_THRESH){
 				jumping=false;
 				jump_count=0;
+				falling=true;
 			}
 		}
 	}
@@ -154,17 +342,40 @@ public class Boy {
 	}
 
 	
+	//called every time the player presses the jump key (SPACE for now)
+	//if the character is not already jumping (boolean jumpin=true)
 	public void jump() {
+		//sets the jumping state to true
 		this.jumping=true;
+		
+		//reinitialize the jump_count, useful to determine for how 
+		//much time the character is going to stay in the air
 		this.jump_count=0;
+		
+		//sets the current jumping frame based on the last direction 
+		if(last_direction==KeyEvent.VK_RIGHT){
+			currentFrame=run_R[2];
+		} else {
+			currentFrame=run_L[2];
+		}
 	}
 	
 	public boolean getJumping() {
 		return jumping;
 	}
 	
+	//jump_count works with JUMP_COUNTER_THRESH: in particular this 
+	//variable is incremented every time the main thread calls the checkState()
+	//function and goes on until jump_count has not reached JUMP_COUNTER_THRESH
+	//making the currentY of the character smaller and smaller so that he keeps
+	//ascending. When the jump_count reaches JUMP_COUNTER_THRESH the currentY is 
+	//incremented for the character is in the descending phase of the jump. It goes on
+	//incrementing until jump_count reaches JUMP_COUNTER_THRESH*2, then the jumping 
+	//boolean is set to false and the count is reinitialized
 	private int jump_count=0;
 	
+	//jumping is 'true' when the character is actually jumping
+	//is 'false' when the character is not up in the air
 	private boolean jumping;
 
 	//gets the current frame of the animation
@@ -198,7 +409,51 @@ public class Boy {
 		} else {
 			currentFrame=idle_L;
 		}
+		this.idle=true;
 	}
+	
+	
+	public boolean getFalling(){
+		return falling;
+	}
+	
+
+	public boolean getRestoring() {
+		return restoring;
+	}
+	
+	public int getLife() {
+		return life;
+	}
+	
+
+	public boolean outOfBounds() {
+		if(currentX>=GameFrame.WIDTH){
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private final static int RESTORING_THRESH=84;
+	
+	private final static int RESTORING_MODULE=12;
+	
+	private int restoring_count=0;
+	
+	//restoring is true when the character has just died and remains
+	//true until his body flashes 3 times
+	private boolean restoring=false;
+	
+	//true when the character is falling
+	//false when the character is not falling
+	//initially the protagonist is not falling
+	private boolean falling=false;
+	
+	//JUMP_COUNTER_THRESH is the upper bound to the counter jump_count:
+	//- from 0 to JUMP_COUNTER_THRESH the character is going up 
+	//- from JUMP_COUNTER_THRESH to JUMP_COUNTER_THRESH*2 the character is going down 
+	private static final int JUMP_COUNTER_THRESH=20;
 	
 	//initially the last direction is right 
 	private int last_direction=KeyEvent.VK_RIGHT;
@@ -213,7 +468,7 @@ public class Boy {
 	//it defines the space occupied by the character at the specific moment 
 	private Rectangle boundingBox;
 	
-	//DISPLACEMENT is the distance is the distance covered by a single step of the character
+	//DISPLACEMENT is the distance covered by a single step of the character
 	private static final int DISPLACEMENT=4;
 	
 	//current frame in the animation
@@ -233,12 +488,14 @@ public class Boy {
 	
 	//the initial width offset of the character
 	public static final int BOY_START_X=128;
+
+	public static final int MAX_LIFE = 3;
 	
 	//height of the main character (used to set the boundingBox)
 	private final int BOY_HEIGHT=64;
 	
 	//width of the main character (used to set the boundingBox)
-	private final int BOY_WIDTH=40;
+	private final int BOY_WIDTH=32;
 	
 	//current position of the character along the x-axis 
 	//initially the character is placed at BOY_START_X
@@ -247,4 +504,14 @@ public class Boy {
 	//current position of the character along the y-axis 
 	//initially the character is placed at BOY_START_X
 	private int currentY=GameFrame.HEIGHT-PlayPanel.TERRAIN_HEIGHT-BOY_HEIGHT;
+	
+	private int currentCol=currentX/Tile.TILE_SIZE;
+	
+	private int currentRow=currentY/Tile.TILE_SIZE;
+	
+	//idle is 'true' if the character is not moving, false otherwise
+	private boolean idle=true;
+	
+	//life initially equals 3, every time the character dies it decrements (life--)
+	private int life=MAX_LIFE;
 }

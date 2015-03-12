@@ -13,6 +13,7 @@ public class Main {
 		gameManager.start();
 		
 		//start-up the game main frame 
+		@SuppressWarnings("unused")
 		GameFrame gameFrame=new GameFrame(gamePanel);
 	}
 }
