@@ -106,24 +106,14 @@ public class Boy {
 	//frame. The frame changes every MOVE_COUNTER_THRESH increments of the moveCounter variable.
 	//In this case MOVE_COUNTER_THRESH is set to 5
 	private void setFrameNumber() {
-		if(moveCounter>=0 && moveCounter<=MOVE_COUNTER_THRESH*1){
-			currentFrameNumber=0;
-		} else if(moveCounter>MOVE_COUNTER_THRESH*1 && moveCounter<=MOVE_COUNTER_THRESH*2){
-			currentFrameNumber=1;
-		} else if(moveCounter>MOVE_COUNTER_THRESH*2 && moveCounter<=MOVE_COUNTER_THRESH*3){
-			currentFrameNumber=2;
-		} else if(moveCounter>MOVE_COUNTER_THRESH*3 && moveCounter<=MOVE_COUNTER_THRESH*4){
-			currentFrameNumber=3;
-		} else if(moveCounter>MOVE_COUNTER_THRESH*4 && moveCounter<=MOVE_COUNTER_THRESH*5){
-			currentFrameNumber=4;
-		} else if(moveCounter>MOVE_COUNTER_THRESH*5 && moveCounter<=MOVE_COUNTER_THRESH*6){
-			currentFrameNumber=5;
-		} 
+		currentFrameNumber  = moveCounter/MOVE_COUNTER_THRESH;
+		currentFrameNumber %= 6;
 		
 		if(moveCounter>MOVE_COUNTER_THRESH*6){
 			moveCounter=0;
 		}
 	}
+
 
 
 	//gets the current frame of the animation
