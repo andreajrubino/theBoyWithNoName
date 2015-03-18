@@ -42,21 +42,11 @@ public class World {
 	}
 	
 	private Tile newTileInstance(String name, int i, int j) {
-		switch (name) {
-			case "ter0":
-				return new Block("ter0", i, j);
-			case "ter1":
-				return new Block("ter1", i, j);
-			case "terR":
-				return new Block("terR", i, j);
-			case "terL":
-				return new Block("terL", i, j);
-			case "terQ":
-				return new Block("terQ", i, j);
-			case "terP":
-				return new Block("terP", i, j);
-			case "term":
-				return new Block("term", i, j);
+		//APC Addition
+		//if it's not empty return the corresponding block
+		//invalid names will result in an io exception within block
+		if(!name.equals("empt")){
+			return new Block(name, i, j);
 		}
 		return null;
 	}
