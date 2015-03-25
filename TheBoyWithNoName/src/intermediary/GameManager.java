@@ -5,6 +5,7 @@ import java.util.HashSet;
 
 import logic.Boy;
 import logic.KeyboardController;
+import logic.NPC;
 import logic.World;
 import gui.GamePanel;
 
@@ -16,12 +17,20 @@ public class GameManager extends Thread {
 		this.world=new World();
 		this.world.initializeStage(currentLevel);
 		
+		this.npcManager=new NPCManager(currentLevel);
+		
 		//initialize the protagonist of the game
 		this.boy=new Boy();
 		
-		//stores the gamePanel and adds the boy to it
+		//stores the gamePanel and adds the boy and the npcs to it
 		this.gamePanel=gamePanel;
 		this.gamePanel.addBoy(boy);
+		
+		if(npcManager.getNPCs().size()>0){
+			gamePanel.addNPCs(npcManager.getNPCs());
+		} else {
+			gamePanel.clearNPCs();
+		}
 		
 		//while you're playing the game, the gameIsRunning is set to true
 		this.gameIsRunning=true;
@@ -32,7 +41,9 @@ public class GameManager extends Thread {
 		while(gameIsRunning){
 			
 			if(boy.outOfBounds()){
-				world.initializeStage(++currentLevel);
+				currentLevel++;
+				npcManager.initializeStage(currentLevel);
+				world.initializeStage(currentLevel);
 				boy.reinitialize();
 			}
 			
@@ -44,10 +55,12 @@ public class GameManager extends Thread {
 			//manage the keys currently pressed
 			manageKeys();
 			
+			boy.checkCollectibles();
+			
 			boy.checkBlockCollisions();
 			
 			boy.checkRestoringCount();
-			
+				
 			gamePanel.repaintGame();
 			
 			try {
@@ -64,16 +77,18 @@ public class GameManager extends Thread {
 		//get the currently pressed keys from the KeyboardController
 		HashSet<Integer> currentKeys=KeyboardController.getActiveKeys();
 		
-		//manage the two possible run direction
-		if(currentKeys.contains(KeyEvent.VK_RIGHT)){
-			//move right
-			boy.move(KeyEvent.VK_RIGHT);
-		} else if (currentKeys.contains(KeyEvent.VK_LEFT)){
-			//move left
-			boy.move(KeyEvent.VK_LEFT);
-		} else if(currentKeys.isEmpty() && !boy.getJumping() && !boy.getFalling()){
-			//if the player is not pressing keys, the protagonist stands still
-			boy.stop();
+		if(!listening){
+			//manage the two possible run direction
+			if(currentKeys.contains(KeyEvent.VK_RIGHT)){
+				//move right
+				boy.move(KeyEvent.VK_RIGHT);
+			} else if (currentKeys.contains(KeyEvent.VK_LEFT)){
+				//move left
+				boy.move(KeyEvent.VK_LEFT);
+			} else if(currentKeys.isEmpty() && !boy.getJumping() && !boy.getFalling()){
+				//if the player is not pressing keys, the protagonist stands still
+				boy.stop();
+			}
 		}
 		
 		if(currentKeys.contains(KeyEvent.VK_SPACE)) {
@@ -82,11 +97,38 @@ public class GameManager extends Thread {
 			}
 		}
 		
+		if(currentKeys.contains(KeyEvent.VK_ENTER)){
+			NPC tempNpc;
+			//find the closest npc according to the character's position
+			if((tempNpc=npcManager.closestNPC(boy.getRow(),boy.getCol()))!=null){
+				
+				//if the npc is already talking, keep talking...
+				if(tempNpc.isTalking()){
+					if(!(tempNpc.continueTalking())){
+						listening=false;
+					}
+				
+				//otherwise interact with the npc
+				} else {
+					tempNpc.interact();
+					
+					//put the character in <idle> status when he's talking
+					boy.stop();
+					
+					//prevent the character from moving when talking
+					listening=true;
+				}
+			}
+			currentKeys.remove(KeyEvent.VK_ENTER);
+		}
+		
 	}
 
 	public Boy getBoy(){
 		return boy;
 	}
+	
+	private boolean listening=false;
 	
 	//number of the current level the character finds himself in
 	private int currentLevel=1;
@@ -106,4 +148,6 @@ public class GameManager extends Thread {
 	private Boy boy;
 	
 	private World world;
+	
+	private NPCManager npcManager;
 }

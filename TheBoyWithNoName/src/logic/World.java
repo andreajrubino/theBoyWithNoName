@@ -43,22 +43,36 @@ public class World {
 	
 	private Tile newTileInstance(String name, int i, int j) {
 		switch (name) {
-			case "ter0":
-				return new Block("ter0", i, j);
-			case "ter1":
-				return new Block("ter1", i, j);
-			case "terR":
-				return new Block("terR", i, j);
-			case "terL":
-				return new Block("terL", i, j);
-			case "terQ":
-				return new Block("terQ", i, j);
-			case "terP":
-				return new Block("terP", i, j);
-			case "term":
-				return new Block("term", i, j);
+	        case "ter0":
+	            return new Block("ter0", i, j);
+	        case "ter1":
+	            return new Block("ter1", i, j);
+	        case "terR":
+	            return new Block("terR", i, j);
+	        case "terL":
+	            return new Block("terL", i, j);
+	        case "terQ":
+	            return new Block("terQ", i, j);
+	        case "terP":
+	            return new Block("terP", i, j);
+	        case "term":
+	            return new Block("term", i, j);
+	        case "mayC":
+	            return new Block("mayC", i, j);
+	        case "mayD":
+	            return new Block("mayD", i, j);
+	        case "mayU":
+	            return new Block("mayU", i, j);
+	        case "dart":
+	        	return new Collectible("dart",i , j);
+	        case "cros":
+	        	return new Weapon("crossbow",i , j);
 		}
 		return null;
+	}
+	
+	public static void emptyTile(int currentRow, int currentCol) {
+		tiledMap[currentRow][currentCol]=null;
 	}
 	
 	public static BufferedImage CURRENT_BACKGROUND;

@@ -158,7 +158,7 @@ public class Boy {
 						return;
 					}
 				}
-				if(World.tiledMap[upRow][upRightCornerCol] != null){
+				if(World.tiledMap[upRow][upRightCornerCol] instanceof Block){
 					//if the upper-right corner stats intersecting a block, stop the jumping phase
 					//and start the falling phase, setting the jump_count to 0
 					if(World.tiledMap[upRow][upRightCornerCol].getBoundingBox().intersects(boundingBox)){
@@ -234,6 +234,21 @@ public class Boy {
 					}
 				}
 			}	
+		}
+	}
+
+
+	public void checkCollectibles() {
+		if((boundingBox.getMaxX()/Tile.TILE_SIZE)<World.COLS){
+			if(World.tiledMap[currentRow][currentCol] instanceof Collectible){
+				if(World.tiledMap[currentRow][currentCol].getBoundingBox().intersects(boundingBox)){
+					if(World.tiledMap[currentRow][currentCol].getName().equalsIgnoreCase("dart")){
+						darts++;
+					}
+					
+					World.emptyTile(currentRow,currentCol);	
+				}
+			}
 		}
 	}
 
@@ -320,21 +335,11 @@ public class Boy {
 	//each run direction. The variable moveCounter is incremented each time the gameManager
 	//calls the move function on the Boy. So according to moveCounter we can choose the current
 	//frame. The frame changes every MOVE_COUNTER_THRESH increments of the moveCounter variable.
-	//In this case MOVE_COUNTER_THRESH is set to 5
+	//In this case MOVE_COUNTER_THRESH is set to 5. The use of "6" instead of a variable is temporary
+	//because I still don't know how many frames will be used in the final animation
 	private void setFrameNumber() {
-		if(moveCounter>=0 && moveCounter<=MOVE_COUNTER_THRESH*1){
-			currentFrameNumber=0;
-		} else if(moveCounter>MOVE_COUNTER_THRESH*1 && moveCounter<=MOVE_COUNTER_THRESH*2){
-			currentFrameNumber=1;
-		} else if(moveCounter>MOVE_COUNTER_THRESH*2 && moveCounter<=MOVE_COUNTER_THRESH*3){
-			currentFrameNumber=2;
-		} else if(moveCounter>MOVE_COUNTER_THRESH*3 && moveCounter<=MOVE_COUNTER_THRESH*4){
-			currentFrameNumber=3;
-		} else if(moveCounter>MOVE_COUNTER_THRESH*4 && moveCounter<=MOVE_COUNTER_THRESH*5){
-			currentFrameNumber=4;
-		} else if(moveCounter>MOVE_COUNTER_THRESH*5 && moveCounter<=MOVE_COUNTER_THRESH*6){
-			currentFrameNumber=5;
-		} 
+		currentFrameNumber  = moveCounter/MOVE_COUNTER_THRESH;
+		currentFrameNumber %= 6;
 		
 		if(moveCounter>MOVE_COUNTER_THRESH*6){
 			moveCounter=0;
@@ -363,7 +368,7 @@ public class Boy {
 	public boolean getJumping() {
 		return jumping;
 	}
-	
+		
 	//jump_count works with JUMP_COUNTER_THRESH: in particular this 
 	//variable is incremented every time the main thread calls the checkState()
 	//function and goes on until jump_count has not reached JUMP_COUNTER_THRESH
@@ -426,13 +431,26 @@ public class Boy {
 		return life;
 	}
 	
+	public int getCol(){
+		return currentCol;
+	}
 
+	public int getRow(){
+		return currentRow;
+	}
+	
+	//checks weather the character is out of the screen or not
 	public boolean outOfBounds() {
 		if(currentX>=GameFrame.WIDTH){
 			return true;
 		}
 		
 		return false;
+	}
+	
+	//returns the number of darts currently owned by the boy
+	public int getDarts(){
+		return darts;
 	}
 	
 	private final static int RESTORING_THRESH=84;
@@ -514,4 +532,7 @@ public class Boy {
 	
 	//life initially equals 3, every time the character dies it decrements (life--)
 	private int life=MAX_LIFE;
+	
+	//darts owned by the character. The boy starts with no darts
+	private int darts=0;
 }

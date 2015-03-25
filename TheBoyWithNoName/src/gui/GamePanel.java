@@ -1,11 +1,11 @@
 package gui;
 
 import java.awt.Color;
-
+import java.util.ArrayList;
 import javax.swing.JPanel;
-
 import logic.Boy;
 import logic.KeyboardController;
+import logic.NPC;
 
 //the game panel on which we will draw the true panels of the game
 //it serves just as an interlayer between the frame and the mosaic 
@@ -26,7 +26,6 @@ public class GamePanel extends JPanel{
 		this.add(playPanel);
 		playPanel.setLocation(0, StatsPanel.STATS_HEIGHT);
 		
-		
 		keyboardController=new KeyboardController();
 		this.addKeyListener(keyboardController);
 	}
@@ -41,6 +40,15 @@ public class GamePanel extends JPanel{
 		playPanel.repaint();
 		statsPanel.repaint();
 	}
+	
+	public void clearNPCs() {
+		playPanel.clearNPCs();
+	}
+
+	public void addNPCs(ArrayList<NPC> currentNPCs) {
+		playPanel.addNPCs(currentNPCs);
+	}
+
 	
 	private KeyboardController keyboardController;
 	private StatsPanel statsPanel=new StatsPanel();
