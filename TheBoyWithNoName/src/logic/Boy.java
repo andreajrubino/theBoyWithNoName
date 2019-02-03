@@ -33,26 +33,26 @@ public class Boy {
 	//loads all the sprites needed to animate the character 
 	private void loadInformations() {
 		try {
-			idle_R=ImageIO.read(getClass().getResource("../images/idle_R.png"));
-			idle_L=ImageIO.read(getClass().getResource("../images/idle_L.png"));
+			idle_R=ImageIO.read(getClass().getResource("/images/idle_R.png"));
+			idle_L=ImageIO.read(getClass().getResource("/images/idle_L.png"));
 			
-			run_R[0]=ImageIO.read(getClass().getResource("../images/run_R0.png"));
-			run_L[0]=ImageIO.read(getClass().getResource("../images/run_L0.png"));
+			run_R[0]=ImageIO.read(getClass().getResource("/images/run_R0.png"));
+			run_L[0]=ImageIO.read(getClass().getResource("/images/run_L0.png"));
 			
-			run_R[1]=ImageIO.read(getClass().getResource("../images/run_R1.png"));
-			run_L[1]=ImageIO.read(getClass().getResource("../images/run_L1.png"));
+			run_R[1]=ImageIO.read(getClass().getResource("/images/run_R1.png"));
+			run_L[1]=ImageIO.read(getClass().getResource("/images/run_L1.png"));
 			
-			run_R[2]=ImageIO.read(getClass().getResource("../images/run_R2.png"));
-			run_L[2]=ImageIO.read(getClass().getResource("../images/run_L2.png"));
+			run_R[2]=ImageIO.read(getClass().getResource("/images/run_R2.png"));
+			run_L[2]=ImageIO.read(getClass().getResource("/images/run_L2.png"));
 			
-			run_R[3]=ImageIO.read(getClass().getResource("../images/run_R3.png"));
-			run_L[3]=ImageIO.read(getClass().getResource("../images/run_L3.png"));
+			run_R[3]=ImageIO.read(getClass().getResource("/images/run_R3.png"));
+			run_L[3]=ImageIO.read(getClass().getResource("/images/run_L3.png"));
 			
-			run_R[4]=ImageIO.read(getClass().getResource("../images/run_R4.png"));
-			run_L[4]=ImageIO.read(getClass().getResource("../images/run_L4.png"));
+			run_R[4]=ImageIO.read(getClass().getResource("/images/run_R4.png"));
+			run_L[4]=ImageIO.read(getClass().getResource("/images/run_L4.png"));
 			
-			run_R[5]=ImageIO.read(getClass().getResource("../images/run_R5.png"));
-			run_L[5]=ImageIO.read(getClass().getResource("../images/run_L5.png"));
+			run_R[5]=ImageIO.read(getClass().getResource("/images/run_R5.png"));
+			run_L[5]=ImageIO.read(getClass().getResource("/images/run_L5.png"));
 			
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -24,9 +24,9 @@ public class StatsPanel extends JPanel{
 
     private void loadInformations() {
         try {
-            statsPanel=ImageIO.read(getClass().getResource("../images/statsBar.png"));
-            livingHeart=ImageIO.read(getClass().getResource("../images/livingHeart.png"));
-            deadHeart=ImageIO.read(getClass().getResource("../images/deadHeart.png"));
+            statsPanel=ImageIO.read(getClass().getResource("/images/statsBar.png"));
+            livingHeart=ImageIO.read(getClass().getResource("/images/livingHeart.png"));
+            deadHeart=ImageIO.read(getClass().getResource("/images/deadHeart.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }

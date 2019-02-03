@@ -15,7 +15,7 @@ public class World {
 
     public void initializeStage(int level){
         try {
-            CURRENT_BACKGROUND=ImageIO.read(getClass().getResource("../images/background"+String.valueOf(level)+".png"));
+            CURRENT_BACKGROUND=ImageIO.read(getClass().getResource("/images/background"+String.valueOf(level)+".png"));
         } catch (IOException e1) {
             e1.printStackTrace();
         }
