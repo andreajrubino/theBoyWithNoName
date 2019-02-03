@@ -7,6 +7,8 @@ import java.awt.RenderingHints;
 import javax.swing.JPanel;
 
 import logic.Boy;
+import logic.Tile;
+import logic.World;
 
 //PlayPanel - Is the panel where you see the actual game in motion,
 //all the big part under the stats panel 
@@ -38,14 +40,21 @@ public class PlayPanel extends JPanel{
 		//use antialiasing to draw smoother images and lines
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		
-		//temporary - draw a grid of tile-sized cells just to get an idea of how the world parts will be placed
-		for(int i=0; i<20; i++){
-			g2.drawLine(0, i*64, GameFrame.WIDTH, i*64);
-			g2.drawLine(i*64, 0, i*64, GameFrame.HEIGHT);
+		g2.drawImage(World.CURRENT_BACKGROUND,0,-Tile.TILE_SIZE,GameFrame.WIDTH,PLAY_PANEL_HEIGHT, null);
+
+        for(int i=0; i<World.ROWS; i++){
+            for(int j=0; j<World.COLS; j++){
+                if(World.tiledMap[i][j]!=null){
+                    g2.drawImage(World.tiledMap[i][j].getImage(), j*Tile.TILE_SIZE, i*Tile.TILE_SIZE, null);
+                }
+            }
 		}
 		
 		//draw the protagonist of the game
-		g2.drawImage(boy.getCurrentFrame(),boy.getCurrentX(),boy.getCurrentY(),null);
+        if(!boy.getRestoring()){
+            g2.drawImage(boy.getCurrentFrame(),boy.getCurrentX(),boy.getCurrentY(),null);
+            g2.draw(boy.getBoundingBox());
+        }
 	}
 	
 	//function called by the GameManager to add the boy (protagonist) to the play panel at runtime
