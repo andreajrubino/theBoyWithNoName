@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-//blocks are all those tiles that you can walk on and collide agains
+//blocks are all those tiles that you can walk on and collide against
 //they do not entail any kind of interaction
 public class Block extends Tile {
 
@@ -24,7 +24,7 @@ public class Block extends Tile {
 
     protected void loadInformations() {
         try {
-            image=ImageIO.read(getClass().getResource("../images/"+imgName+".png"));
+            image=ImageIO.read(getClass().getResource("/images/"+imgName+".png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
