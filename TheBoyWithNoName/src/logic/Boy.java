@@ -14,7 +14,7 @@ import javax.imageio.ImageIO;
 //the boy is the main character of the game, the one you control with your arrow keys
 public class Boy {
 	public Boy(){
-		//initialize the buffers that will store the run sprites
+		//Initialise the buffers that will store the run sprites
 		run_L=new BufferedImage[BUFFER_RUN_SIZE];
 		run_R=new BufferedImage[BUFFER_RUN_SIZE];
 		
@@ -33,8 +33,7 @@ public class Boy {
 	//loads all the sprites needed to animate the character 
 	private void loadInformations() {
 		try {
-		    
-	        BufferedImage spritesheet = ImageIO.read(getClass().getResource("/images/THE-BOY.png"));
+	        BufferedImage spritesheet = ImageIO.read(getClass().getResource("/images/player.png"));
 		  
 			idle_R=spritesheet.getSubimage(0, 0, 40, 64);
 			idle_L=spritesheet.getSubimage(0, 64, 40, 64);
