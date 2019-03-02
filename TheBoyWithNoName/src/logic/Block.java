@@ -9,9 +9,9 @@ import javax.imageio.ImageIO;
 //they do not entail any kind of interaction
 public class Block extends Tile {
 
-    public Block(String imgName,int i, int j) {
+    public Block(int imgNum,int i, int j) {
         super(i,j);
-        this.imgName=imgName;
+        this.imgNum=imgNum;
         loadInformations();
     }
 
@@ -24,13 +24,13 @@ public class Block extends Tile {
 
     protected void loadInformations() {
         try {
-            image=ImageIO.read(getClass().getResource("/images/"+imgName+".png"));
+            image=ImageIO.read(getClass().getResource("/images/terrain.png")).getSubimage(imgNum * 64, 0, 64, 64);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private String imgName;
+    private int imgNum;
     private int x;
     private int y;
 }

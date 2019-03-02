@@ -44,19 +44,19 @@ public class World {
     private Tile newTileInstance(String name, int i, int j) {
         switch (name) {
             case "ter0":
-                return new Block("ter0", i, j);
+                return new Block(1, i, j);
             case "ter1":
-                return new Block("ter1", i, j);
+                return new Block(2, i, j);
             case "terR":
-                return new Block("terR", i, j);
+                return new Block(6, i, j);
             case "terL":
-                return new Block("terL", i, j);
+                return new Block(5, i, j);
             case "terQ":
-                return new Block("terQ", i, j);
+                return new Block(4, i, j);
             case "terP":
-                return new Block("terP", i, j);
+                return new Block(3, i, j);
             case "term":
-                return new Block("term", i, j);
+                return new Block(0, i, j);
         }
         return null;
     }
